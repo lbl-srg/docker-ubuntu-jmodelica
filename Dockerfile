@@ -13,40 +13,30 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
 # Install required packages
 RUN apt-get update && \
     apt-get install -y \
-    g++ \
-    subversion \
-    gfortran \
-    ipython \
-    cmake \
-    swig \
-    python-dev \
-    python-numpy \
-    python-scipy \
-    python-matplotlib \
-    cython \
-    python-lxml \
-    python-nose \
-    python-jpype \
-    zlib1g-dev \
-    libboost-dev \
-    g++ \
-    subversion \
-    gfortran \
-    ipython \
-    cmake \
-    swig \
     ant \
-    python-dev \
-    python-numpy \
-    python-scipy \
-    python-matplotlib \
-    python-pip \
-    default-jdk \
-    openjdk-8-jdk \
-    jcc \
-    wget \
     autoconf \
-    pkg-config && \
+    cmake \
+    cython \
+    default-jdk \
+    g++ \
+    gfortran \
+    ipython 
+    jcc \
+    libboost-dev \
+    openjdk-8-jdk \
+    pkg-config \
+    python-dev \
+    python-jpype \
+    python-lxml \
+    python-matplotlib \
+    python-nose \
+    python-numpy \
+    python-pip \
+    python-scipy \
+    subversion \
+    swig \
+    wget \
+    zlib1g-dev && \
     rm -rf /var/lib/apt/lists/*
 
 # Install jcc-3.0 to avoid error in python -c "import jcc"
