@@ -20,7 +20,7 @@ RUN apt-get update && \
     default-jdk \
     g++ \
     gfortran \
-    ipython 
+    ipython \
     jcc \
     libboost-dev \
     openjdk-8-jdk \
