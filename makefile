@@ -27,6 +27,14 @@ build:
 push:
 	docker push ${DOCKER_USERNAME}/${IMG_NAME}
 
+verify-image:
+	$(eval TMPDIR := $(shell mktemp -d -t ubuntu-jmodelica-verification-XXXX))
+	@echo "Running verification in $(TMPDIR)"
+	cd ${TMPDIR} && wget https://github.com/lbl-srg/BuildingsPy/archive/master.zip && unzip -q master.zip && rm master.zip
+	$(eval PYTHONPATH := ${TMPDIR}/BuildingsPy-master)
+	echo ${PYTHONPATH}
+	cd ${TMPDIR} && wget https://github.com/lbl-srg/modelica-buildings/archive/master.zip && unzip -q master.zip && rm master.zip
+	cd ${TMPDIR}/modelica-buildings-master/Buildings && ../bin/runUnitTests.py -t jmodelica
 
 remove-image:
 	docker rmi ${DOCKER_USERNAME}/${IMG_NAME}
