@@ -30,11 +30,11 @@ push:
 verify-image:
 	$(eval TMPDIR := $(shell mktemp -d -t ubuntu-jmodelica-verification-XXXX))
 	@echo "Running verification in $(TMPDIR)"
-	cd ${TMPDIR} && wget https://github.com/lbl-srg/BuildingsPy/archive/master.zip && unzip -q master.zip && rm master.zip
-	$(eval PYTHONPATH := ${TMPDIR}/BuildingsPy-master)
-	echo ${PYTHONPATH}
-	cd ${TMPDIR} && wget https://github.com/lbl-srg/modelica-buildings/archive/master.zip && unzip -q master.zip && rm master.zip
-	cd ${TMPDIR}/modelica-buildings-master/Buildings && ../bin/runUnitTests.py -t jmodelica
+	cd ${TMPDIR} && git clone --depth 1 --quiet git@github.com:lbl-srg/BuildingsPy.git
+	$(eval PYTHONPATH := ${TMPDIR}/BuildingsPy)
+	cd ${TMPDIR} && git clone --depth 1 --quiet git@github.com:lbl-srg/modelica-buildings.git
+	cd ${TMPDIR}/modelica-buildings/Buildings && ../bin/runUnitTests.py -t jmodelica
+	rm -rf ${TMPDIR}
 
 remove-image:
 	docker rmi ${DOCKER_USERNAME}/${IMG_NAME}
