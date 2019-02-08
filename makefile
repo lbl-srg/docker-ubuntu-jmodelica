@@ -33,7 +33,7 @@ verify-image:
 	cd ${TMPDIR} && git clone --depth 1 --quiet https://github.com/lbl-srg/BuildingsPy.git
 	$(eval PYTHONPATH := ${TMPDIR}/BuildingsPy)
 	cd ${TMPDIR} && git clone --depth 1 --quiet https://github.com/lbl-srg/modelica-buildings.git
-	cd ${TMPDIR}/modelica-buildings/Buildings && ../bin/runUnitTests.py -t jmodelica -n 16
+	cd ${TMPDIR}/modelica-buildings/Buildings && ../bin/runUnitTests.py -t jmodelica -n 20
 	rm -rf ${TMPDIR}
 
 remove-image:
