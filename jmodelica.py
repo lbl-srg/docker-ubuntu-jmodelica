@@ -3,6 +3,7 @@
 #
 ##########################################################################
 # Import the function for compilation of models and the load_fmu method
+
 from pymodelica import compile_fmu
 import traceback
 import logging
@@ -10,51 +11,114 @@ import logging
 from pyfmi import load_fmu
 import pymodelica
 
-def _simulate(model):
-    import os
+import os
+import shutil
+import sys
 #    import matplotlib.pyplot as plt
 
-    fmu_name = compile_fmu(model,
-                           version="2.0",
-                           compiler_log_level='error',
-                           compiler_options = {"generate_html_diagnostics" : False})
+debug_solver = False
+model="Buildings.Controls.OBC.CDL.Continuous.Validation.LimPID"
+# Overwrite model with command line argument if specified
+if len(sys.argv) > 1:
+  # If the argument is a file, then parse it to a model name
+  if os.path.isfile(sys.argv[1]):
+    model = sys.argv[1].replace(os.path.sep, '.')[:-3]
+  else:
+    model=sys.argv[1]
 
-    # Load model
-    mod = load_fmu(fmu_name, log_level=3)
 
-    opts = mod.simulate_options() #Retrieve the default options
-    opts['logging'] = False
-    opts['solver'] = 'CVode'
-    opts['ncp'] = 500
-    opts['CVode_options']['atol'] = 1.0e-6 #Options specific for CVode
-    opts['CVode_options']['rtol'] = 1.0e-6 #Options specific for CVode
+print("*** Compiling {}".format(model))
+# Increase memory
+pymodelica.environ['JVM_ARGS'] = '-Xmx4096m'
 
-    res = mod.simulate(options=opts)
+
+sys.stdout.flush()
+
+######################################################################
+# Compile fmu
+fmu_name = compile_fmu(model,
+                       version="2.0",
+                       compiler_log_level='warning',
+                       compiler_options = {"generate_html_diagnostics" : False})
+
+######################################################################
+# Load model
+mod = load_fmu(fmu_name, log_level=3)
+
+######################################################################
+# Retrieve and set solver options
+x_nominal = mod.nominal_continuous_states
+opts = mod.simulate_options() #Retrieve the default options
+
+opts['solver'] = 'CVode'
+opts['ncp'] = 5000
+
+if opts['solver'].lower() == 'cvode':
+  # Set user-specified tolerance if it is smaller than the tolerance in the .mo file
+  rtol = 1.0e-6
+  x_nominal = mod.nominal_continuous_states
+
+  if len(x_nominal) > 0:
+    atol = rtol*x_nominal
+  else:
+    atol = rtol
+
+  opts['CVode_options'] = {
+    'external_event_detection': False,
+    'maxh': (mod.get_default_experiment_stop_time()-mod.get_default_experiment_stop_time())/float(opts['ncp']),
+    'iter': 'Newton',
+    'discr': 'BDF',
+    'rtol': rtol,
+    'atol': atol,
+    'store_event_points': True
+    }
+
+if debug_solver:
+  opts["logging"] = True #<- Turn on solver debug logging
+mod.set("_log_level", 6)
+
+######################################################################
+# Simulate
+res = mod.simulate(options=opts)
 #        logging.error(traceback.format_exc())
 
-#    plt.plot(res['time'], res['line2.y'])
+#    plt.plot(res['time'], res['x1'])
+#    plt.plot(res['time'], res['x2'])
 #    plt.xlabel('time in [s]')
 #    plt.ylabel('line2.y')
 #    plt.grid()
+#    plt.show()
 #    plt.savefig("plot.pdf")
 
+######################################################################
+# Copy style sheets.
+# This is a hack to get the css and js files to render the html diagnostics.
+htm_dir = os.path.splitext(os.path.basename(fmu_name))[0] + "_html_diagnostics"
+if os.path.exists(htm_dir):
+    for fil in ["scripts.js", "style.css", "zepto.min.js"]:
+        src = os.path.join(".jmodelica_html", fil)
+        if os.path.exists(src):
+            des = os.path.join(htm_dir, fil)
+            shutil.copyfile(src, des)
 
-if __name__=="__main__":
-    from multiprocessing import Pool
-    import multiprocessing
+######################################################################
+# Get debugging information
+if debug_solver:
+  #Load the debug information
+  from pyfmi.debug import CVodeDebugInformation
+  debug = CVodeDebugInformation(model.replace(".", "_")+"_debug.txt")
 
-    # Increase memory
-    pymodelica.environ['JVM_ARGS'] = '-Xmx4096m'
+  ### Below are options to plot the order, error and step-size evolution.
+  ### The error methos also take a threshold and a region if you want to
+  ### limit the plot to a certain interval.
 
-    models = [
-      "Buildings.Controls.OBC.CDL.Continuous.Validation.LimPID",
-      "Buildings.Controls.OBC.CDL.Continuous.Validation.Limiter"
-    ]
-    # Number of parallel processes
-    if len(models) == 1:
-        _simulate(models[0])
-    else:
-        nPro = multiprocessing.cpu_count()
-        nPro = 20
-        po = Pool(nPro)
-        po.map(_simulate, models)
+  #Plot order evolution
+  debug.plot_order()
+
+  #Plot error evolution
+  debug.plot_error() #Note see also the arguments to the method
+
+  #Plot the used step-size
+  debug.plot_step_size()
+
+  #See also debug?
