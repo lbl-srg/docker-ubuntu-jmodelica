@@ -16,3 +16,5 @@ This will search on the `MODELICAPATH` for the model `Buildings.Controls.OBC.CDL
 and simulate it.
 
 For interactive simulation, add the `-i` flag.
+
+Open the file `jmodelica.py` to see options for diagnostics and debugging.
