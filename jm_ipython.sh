@@ -36,9 +36,23 @@ sha_dir=`dirname ${cur_dir}`
 # replace it with . as the docker may have a different file structure
 arg_lis=`echo $@ | sed -e "s|${cur_dir}|.|g"`
 
-#  --user=${UID} \
+# Check if the python script should be run interactively (if -i is specified)
+while [ $# -ne 0 ]
+do
+    arg="$1"
+    case "$arg" in
+        -i)
+            interactive=true
+            DOCKER_INTERACTIVE=-t
+            ;;
+    esac
+    shift
+done
+
+# --user=${UID} \
 docker run \
-  --user=1000 \
+  -i \
+  $DOCKER_INTERACTIVE \
   --detach=false \
   ${MOD_MOUNT} \
   -v ${sha_dir}:/mnt/shared \
