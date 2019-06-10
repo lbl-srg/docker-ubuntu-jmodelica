@@ -1,5 +1,9 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 MAINTAINER Michael Wetter <mwetter@lbl.gov>
+
+# Revision numbers from svn
+ENV REV_JMODELICA 12886
+ENV REV_ASSIMULO 873
 
 # Set environment variables
 ENV SRC_DIR /usr/local/src
@@ -13,36 +17,34 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
 # Install required packages
 RUN apt-get update && \
     apt-get install -y \
-    ant \
-    autoconf \
-    cmake \
-    cython \
-    default-jdk \
-    g++ \
-    gfortran \
-    ipython \
-    jcc \
-    libboost-dev \
-    openjdk-8-jdk \
-    pkg-config \
-    python-dev \
-    python-jpype \
+    ant=1.10.5-3~18.04 \
+    autoconf=2.69-11 \
+    cmake=3.10.2-1ubuntu2 \
+    cython=0.26.1-0.4 \
+    g++=4:7.4.0-1ubuntu2.2 \
+    gfortran=4:7.4.0-1ubuntu2.2 \
+    ipython=5.5.0-1 \
+    libboost-dev=1.65.1.0ubuntu1 \
+    openjdk-8-jdk=8u212-b03-0ubuntu1.18.04.1 \
+    pkg-config=0.29.1-0ubuntu2 \
+    python-dev=2.7.15~rc1-1 \
+    python-jpype=0.6.2+dfsg-2 \
     python-lxml \
     python-matplotlib \
     python-nose \
-    python-numpy \
-    python-pip \
-    python-scipy \
-    subversion \
-    swig \
-    wget \
-    zlib1g-dev && \
+    python-numpy=1:1.13.3-2ubuntu1 \
+    python-pip=9.0.1-2.3~ubuntu1 \
+    python-scipy=0.19.1-2ubuntu1 \
+    subversion=1.9.7-4ubuntu1 \
+    swig=3.0.12-1 \
+    wget=1.19.4-1ubuntu2.2 \
+    zlib1g-dev=1:1.2.11.dfsg-0ubuntu2 && \
     rm -rf /var/lib/apt/lists/*
 
 # Install jcc-3.0 to avoid error in python -c "import jcc"
 RUN pip install --upgrade pip
-RUN ln -s /usr/lib/jvm/java-8-openjdk-amd64 /usr/lib/jvm/java-8-oracle && \
-    pip install --upgrade jcc
+RUN ln -s /usr/lib/jvm/java-8-openjdk-amd64 /usr/lib/jvm/java-8-oracle
+RUN pip install --upgrade jcc==3.5
 
 RUN export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 RUN export JCC_JDK=/usr/lib/jvm/java-8-openjdk-amd64
@@ -62,10 +64,10 @@ RUN cd $SRC_DIR && \
     ./configure --prefix=/usr/local/Ipopt-3.12.4 && \
     make install && \
     cd $SRC_DIR && \
-    svn export https://svn.jmodelica.org/trunk JModelica && \
+    svn export -q -r $REV_JMODELICA https://svn.jmodelica.org/trunk JModelica && \
     cd $SRC_DIR/JModelica/external && \
     rm -rf $SRC_DIR/JModelica/external/Assimulo && \
-    svn export https://svn.jmodelica.org/assimulo/trunk Assimulo && \
+    svn export -q -r $REV_ASSIMULO https://svn.jmodelica.org/assimulo/trunk Assimulo && \
     cd $SRC_DIR/JModelica && \
     rm -rf build && \
     mkdir build && \

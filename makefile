@@ -1,4 +1,4 @@
-IMG_NAME=ubuntu-1604_jmodelica_trunk
+IMG_NAME=ubuntu-1804_jmodelica_trunk
 DOCKER_USERNAME=michaelwetter
 
 COMMAND_RUN=docker run \
@@ -21,6 +21,10 @@ COMMAND_START=docker run \
 	  ${DOCKER_USERNAME}/${IMG_NAME} \
 	  /bin/bash -c -i
 
+print_latest_versions_from_svn:
+	svn log -l 1 https://svn.jmodelica.org/trunk
+	svn log -l 1 https://svn.jmodelica.org/assimulo/trunk
+
 build:
 	docker build --no-cache --rm -t ${DOCKER_USERNAME}/${IMG_NAME} .
 
@@ -33,7 +37,7 @@ verify-image:
 	cd ${TMPDIR} && git clone --depth 1 --quiet https://github.com/lbl-srg/BuildingsPy.git
 	$(eval PYTHONPATH := ${TMPDIR}/BuildingsPy)
 	cd ${TMPDIR} && git clone --depth 1 --quiet https://github.com/lbl-srg/modelica-buildings.git
-	cd ${TMPDIR}/modelica-buildings/Buildings && ../bin/runUnitTests.py -t jmodelica -n 20
+	cd ${TMPDIR}/modelica-buildings/Buildings && ../bin/runUnitTests.py -t jmodelica -n 44
 	rm -rf ${TMPDIR}
 
 remove-image:

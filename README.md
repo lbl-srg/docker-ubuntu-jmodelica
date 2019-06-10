@@ -5,7 +5,7 @@ of the [Modelica Buildings library](https://github.com/lbl-srg/modelica-building
 of the [Modelica IBPSA library](https://github.com/lbl-srg/modelica-buildings).
 
 The docker image can be downloaded from
-[https://cloud.docker.com/u/michaelwetter/repository/docker/michaelwetter/ubuntu-1604_jmodelica_trunk](https://cloud.docker.com/u/michaelwetter/repository/docker/michaelwetter/ubuntu-1604_jmodelica_trunk)
+[https://cloud.docker.com/u/michaelwetter/repository/docker/michaelwetter/ubuntu-1804_jmodelica_trunk](https://cloud.docker.com/u/michaelwetter/repository/docker/michaelwetter/ubuntu-1804_jmodelica_trunk)
 
 To simulate a model, put the `jm_ipython.sh` file on your system's PATH variable
 and run
