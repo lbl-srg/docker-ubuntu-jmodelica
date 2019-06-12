@@ -2,7 +2,7 @@ FROM ubuntu:18.04
 MAINTAINER Michael Wetter <mwetter@lbl.gov>
 
 # Revision numbers from svn
-ENV REV_JMODELICA 12886
+ENV REV_JMODELICA 12903
 ENV REV_ASSIMULO 873
 
 # Set environment variables
@@ -23,6 +23,7 @@ RUN apt-get update && \
     cython=0.26.1-0.4 \
     g++=4:7.4.0-1ubuntu2.2 \
     gfortran=4:7.4.0-1ubuntu2.2 \
+    libgfortran3 \
     ipython=5.5.0-1 \
     libboost-dev=1.65.1.0ubuntu1 \
     openjdk-8-jdk=8u212-b03-0ubuntu1.18.04.1 \
