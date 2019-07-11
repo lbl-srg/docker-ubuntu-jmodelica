@@ -24,10 +24,16 @@ if [ `uname` == "Darwin" ]; then
     MOD_MOUNT=`echo ${MOD_MOUNT} | sed -e 's| /var/folders/| /private/var/folders/|g'`
 fi
 
-# Prepend /mnt/ in front of each entry, which will then be used as the
+# Prepend /mnt/ in front of each entry, which will then be used as the MODELICAPATH
 DOCKER_MODELICAPATH=`(set -f; IFS=:; printf "/mnt%s:" ${MODELICAPATH})`
 # Cut the trailing ':'
 DOCKER_MODELICAPATH=${DOCKER_MODELICAPATH%?}
+
+# Replace in PYTHONPATH the current directory with /mnt/shared in front of each entry
+CUR_DIR=`pwd`
+PAR_DIR=`dirname ${CUR_DIR}`
+DOCKER_PYTHONPATH=`echo ${PYTHONPATH//${PAR_DIR}/\/mnt\/shared}`
+
 
 cur_dir=`pwd`
 bas_nam=`basename ${cur_dir}`
@@ -50,7 +56,9 @@ do
 done
 
 # --user=${UID} \
+
 docker run \
+  --user=${UID} \
   -i \
   $DOCKER_INTERACTIVE \
   --detach=false \
@@ -61,7 +69,8 @@ docker run \
   --rm \
   ${DOCKER_USERNAME}/${IMG_NAME} /bin/bash -c \
   "export MODELICAPATH=${DOCKER_MODELICAPATH}:/usr/local/JModelica/ThirdParty/MSL && \
+   export PYTHONPATH=${DOCKER_PYTHONPATH} && \
   cd /mnt/shared/${bas_nam} && \
   /usr/local/JModelica/bin/jm_ipython.sh ${arg_lis}"
 exit $?
-#     export PYTHONPATH="Buildings/Resources/Python-Sources" && \
+#  export PYTHONPATH=\"Buildings/Resources/Python-Sources\" && \
