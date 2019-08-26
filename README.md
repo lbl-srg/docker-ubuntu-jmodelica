@@ -8,7 +8,7 @@ The docker image can be downloaded from
 [https://hub.docker.com/r/michaelwetter/ubuntu-1804_jmodelica_trunk](https://hub.docker.com/r/michaelwetter/ubuntu-1804_jmodelica_trunk)
 
 To simulate a model, put the `jm_ipython.sh` file on your system's PATH variable
-and run
+and run from a directory that contains `jmodelica.py` the command
 ```
 jm_ipython.sh jmodelica.py Buildings.Controls.OBC.CDL.Continuous.Validation.LimPID
 ```
