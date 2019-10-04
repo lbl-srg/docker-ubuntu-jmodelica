@@ -34,10 +34,10 @@ push:
 verify-image:
 	$(eval TMPDIR := $(shell mktemp -d -t ubuntu-jmodelica-verification-XXXX))
 	@echo "Running verification in $(TMPDIR)"
-	cd ${TMPDIR} && git clone --depth 1 --quiet https://github.com/lbl-srg/BuildingsPy.git
+	cd ${TMPDIR} && git clone --depth 1 --recurse-submodules --quiet https://github.com/lbl-srg/BuildingsPy.git
 	$(eval PYTHONPATH := ${TMPDIR}/BuildingsPy)
 	cd ${TMPDIR} && git clone --depth 1 --quiet https://github.com/lbl-srg/modelica-buildings.git
-	cd ${TMPDIR}/modelica-buildings/Buildings && ../bin/runUnitTests.py -t jmodelica -n 44
+	cd ${TMPDIR}/modelica-buildings/Buildings && ../bin/runUnitTests.py --skip-verification -t jmodelica -n 44
 	rm -rf ${TMPDIR}
 
 remove-image:
