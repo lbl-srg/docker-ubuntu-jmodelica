@@ -1,14 +1,24 @@
 FROM ubuntu:18.04
 MAINTAINER Michael Wetter <mwetter@lbl.gov>
 
+##################################################
 # Revision numbers from svn
-ENV REV_JMODELICA 12903
-ENV REV_ASSIMULO 873
+# Get latest revision with
+#
+#  svn info https://svn.jmodelica.org/trunk | grep "Last Changed Rev:"
+#  svn info https://svn.jmodelica.org/assimulo/trunk | grep "Last Changed Rev:"
+# or
+#  make print_latest_versions_from_svn
+
+ENV REV_JMODELICA 13677
+ENV REV_ASSIMULO 887
+##################################################
 
 # Set environment variables
 ENV SRC_DIR /usr/local/src
 ENV MODELICAPATH /usr/local/JModelica/ThirdParty/MSL
 
+##################################################
 # Avoid warnings
 # debconf: unable to initialize frontend: Dialog
 # debconf: (TERM is not set, so the dialog frontend is not usable.)
@@ -19,14 +29,14 @@ RUN apt-get update && \
     apt-get install -y \
     ant=1.10.5-3~18.04 \
     autoconf=2.69-11 \
-    cmake=3.10.2-1ubuntu2 \
+    cmake=3.10.2-1ubuntu2.18.04.1 \
     cython=0.26.1-0.4 \
-    g++=4:7.4.0-1ubuntu2.2 \
-    gfortran=4:7.4.0-1ubuntu2.2 \
+    g++=4:7.4.* \
+    gfortran=4:7.4.0-1ubuntu2.3 \
     libgfortran3 \
     ipython=5.5.0-1 \
     libboost-dev=1.65.1.0ubuntu1 \
-    openjdk-8-jdk=8u212-b03-0ubuntu1.18.04.1 \
+    openjdk-8-jdk=8u222-b10-1ubuntu1~18.04.1 \
     pkg-config=0.29.1-0ubuntu2 \
     python-dev=2.7.15~rc1-1 \
     python-jpype=0.6.2+dfsg-2 \
@@ -34,7 +44,7 @@ RUN apt-get update && \
     python-matplotlib \
     python-nose \
     python-numpy=1:1.13.3-2ubuntu1 \
-    python-pip=9.0.1-2.3~ubuntu1 \
+    python-pip=9.0.* \
     python-scipy=0.19.1-2ubuntu1 \
     subversion=1.9.7-4ubuntu1 \
     swig=3.0.12-1 \
