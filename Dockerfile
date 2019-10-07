@@ -10,7 +10,7 @@ MAINTAINER Michael Wetter <mwetter@lbl.gov>
 # or
 #  make print_latest_versions_from_svn
 
-ENV REV_JMODELICA 13675
+ENV REV_JMODELICA 13677
 ENV REV_ASSIMULO 887
 ##################################################
 
