@@ -39,7 +39,8 @@ sys.stdout.flush()
 fmu_name = compile_fmu(model,
                        version="2.0",
                        compiler_log_level='warning',
-                       compiler_options = {"generate_html_diagnostics" : False})
+                       compiler_options = {"generate_html_diagnostics" : False,
+                                           "nle_solver_tol_factor": 1e-2})
 
 ######################################################################
 # Load model
