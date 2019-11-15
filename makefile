@@ -56,8 +56,9 @@ verify-boptest:
 	@echo "Running verification in $(TMPDIR)"
 	cd ${TMPDIR} && git clone --depth 1 --quiet https://github.com/ibpsa/project1-boptest.git
 	# Silently try to remove the old image
-	cd ${TMPDIR}/project1-boptest/testing && make -s remove_jm_image 2> /dev/null | true
-	cd ${TMPDIR}/project1-boptest/testing && make -s test_all remove_jm_image > /dev/null
+	##cd ${TMPDIR}/project1-boptest/testing && make -s remove_jm_image 2> /dev/null | true
+	##cd ${TMPDIR}/project1-boptest/testing && make -s test_all remove_jm_image > /dev/null
+	cd ${TMPDIR}/project1-boptest/testing && make test_all
 	rm -rf ${TMPDIR}
 
 
