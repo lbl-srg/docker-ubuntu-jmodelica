@@ -31,14 +31,35 @@ build:
 push:
 	docker push ${DOCKER_USERNAME}/${IMG_NAME}
 
-verify-image:
-	$(eval TMPDIR := $(shell mktemp -d -t ubuntu-jmodelica-verification-XXXX))
+verify-image: verify-buildings-master verify-buildings-spawn verify-boptest
+
+verify-buildings-master:
+	$(eval TMPDIR := $(shell mktemp -d -t ubuntu-jmodelica-verification-buildings-master-XXXX))
 	@echo "Running verification in $(TMPDIR)"
 	cd ${TMPDIR} && git clone --depth 1 --recurse-submodules --quiet https://github.com/lbl-srg/BuildingsPy.git
 	cd ${TMPDIR} && git clone --depth 1 --quiet https://github.com/lbl-srg/modelica-buildings.git
 	$(eval PYTHONPATH := ${TMPDIR}/BuildingsPy:${TMPDIR}/modelica-buildings/Buildings/Resources/Python-Sources)
 	cd ${TMPDIR}/modelica-buildings/Buildings && ../bin/runUnitTests.py --skip-verification -t jmodelica -n 44
 	rm -rf ${TMPDIR}
+
+verify-buildings-spawn:
+	$(eval TMPDIR := $(shell mktemp -d -t ubuntu-jmodelica-verification-buildings-spawn-XXXX))
+	@echo "Running verification in $(TMPDIR)"
+	cd ${TMPDIR} && git clone --depth 1 --recurse-submodules --quiet https://github.com/lbl-srg/BuildingsPy.git
+	cd ${TMPDIR} && git clone --depth 1 --quiet -b issue1129_energyPlus_zone https://github.com/lbl-srg/modelica-buildings.git
+	$(eval PYTHONPATH := ${TMPDIR}/BuildingsPy:${TMPDIR}/modelica-buildings/Buildings/Resources/Python-Sources)
+	cd ${TMPDIR}/modelica-buildings/Buildings && ../bin/runUnitTests.py --skip-verification -t jmodelica -n 44 -s Buildings.Experimental.EnergyPlus
+	rm -rf ${TMPDIR}
+
+verify-boptest:
+	$(eval TMPDIR := $(shell mktemp -d -t ubuntu-jmodelica-verification-boptest-XXXX))
+	@echo "Running verification in $(TMPDIR)"
+	cd ${TMPDIR} && git clone --depth 1 --quiet https://github.com/ibpsa/project1-boptest.git
+	# Silently try to remove the old image
+	cd ${TMPDIR}/project1-boptest/testing && make -s remove_jm_image 2> /dev/null | true
+	cd ${TMPDIR}/project1-boptest/testing && make -s test_all remove_jm_image > /dev/null
+	rm -rf ${TMPDIR}
+
 
 remove-image:
 	docker rmi ${DOCKER_USERNAME}/${IMG_NAME}
