@@ -61,8 +61,8 @@ verify-boptest:
 	$(eval NEW_PYPA := ${TMPDIR}/project1-boptest)
 	@echo "Silently try to remove the old image"
 	cd ${TMPDIR}/project1-boptest/testing && make -s remove_jm_image 2> /dev/null | true
-	@echo "Running BOPTEST CI tests, stdout redirected to stdout-boptest.log, stderr to stderr-boptest.log"
-	cd ${TMPDIR}/project1-boptest/testing && export PYTHONPATH=${NEW_PYPA} && make -s test_all > ${PWD}/stdout-boptest.log 2> ${PWD}/stderr-boptest.log
+	@echo "Running BOPTEST CI tests, stdout and stderr redirected to verify-boptest.log"
+	cd ${TMPDIR}/project1-boptest/testing && export PYTHONPATH=${NEW_PYPA} && make -s test_all > ${PWD}/verify-boptest.log 2>&1
 	@echo "Silently try to remove the BOPTEST images"
 	cd ${TMPDIR}/project1-boptest/testing && make -s remove_jm_image 2> /dev/null | true
 	rm -rf ${TMPDIR}
