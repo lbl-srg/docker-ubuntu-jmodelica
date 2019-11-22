@@ -28,14 +28,16 @@ print_latest_versions_from_svn:
 build:
 	docker build --no-cache --rm -t ${DOCKER_USERNAME}/${IMG_NAME} .
 
+verify: verify-buildings-master verify-buildings-spawn verify-boptest
+
+
 push:
 	docker push ${DOCKER_USERNAME}/${IMG_NAME}
 
-verify-image: verify-buildings-master verify-buildings-spawn verify-boptest
 
 verify-buildings-master:
 	$(eval TMPDIR := $(shell mktemp -d -t tmp-ubuntu-jmodelica-verification-buildings-master-XXXX))
-	@echo "Running verification in $(TMPDIR)"
+	@echo "Running Modelica Buildings Library verification in $(TMPDIR)"
 	cd ${TMPDIR} && git clone --depth 1 --recurse-submodules --quiet https://github.com/lbl-srg/BuildingsPy.git
 	cd ${TMPDIR} && git clone --depth 1 --quiet https://github.com/lbl-srg/modelica-buildings.git
 	$(eval PYTHONPATH := ${TMPDIR}/BuildingsPy:${TMPDIR}/modelica-buildings/Buildings/Resources/Python-Sources)
@@ -44,7 +46,7 @@ verify-buildings-master:
 
 verify-buildings-spawn:
 	$(eval TMPDIR := $(shell mktemp -d -t tmp-ubuntu-jmodelica-verification-buildings-spawn-XXXX))
-	@echo "Running verification in $(TMPDIR)"
+	@echo "Running Spawn verification in $(TMPDIR)"
 	cd ${TMPDIR} && git clone --depth 1 --recurse-submodules --quiet https://github.com/lbl-srg/BuildingsPy.git
 	cd ${TMPDIR} && git clone --depth 1 --quiet -b issue1129_energyPlus_zone https://github.com/lbl-srg/modelica-buildings.git
 	$(eval PYTHONPATH := ${TMPDIR}/BuildingsPy:${TMPDIR}/modelica-buildings/Buildings/Resources/Python-Sources)
@@ -52,19 +54,18 @@ verify-buildings-spawn:
 	rm -rf ${TMPDIR}
 
 verify-boptest:
+	$(eval PWD := $(shell pwd))
 	$(eval TMPDIR := $(shell mktemp -d -t tmp-ubuntu-jmodelica-verification-boptest-XXXX))
-	@echo "Running verification in $(TMPDIR)"
+	@echo "Running BOPTEST verification in $(TMPDIR)"
 	cd ${TMPDIR} && git clone --depth 1 --quiet https://github.com/ibpsa/project1-boptest.git
-	$(eval OLD_PYPA := ${PYTHONPATH})
 	$(eval NEW_PYPA := ${TMPDIR}/project1-boptest)
-	export PYTHONPATH=${NEW_PYPA}
-	# Silently try to remove the old image
-	##cd ${TMPDIR}/project1-boptest/testing && make -s remove_jm_image 2> /dev/null | true
-	##cd ${TMPDIR}/project1-boptest/testing && make -s test_all remove_jm_image > /dev/null
-	cd ${TMPDIR}/project1-boptest/testing && make test_all
-	export PYTHONPATH=${OLD_PYPA}
+	@echo "Silently try to remove the old image"
+	cd ${TMPDIR}/project1-boptest/testing && make -s remove_jm_image 2> /dev/null | true
+	@echo "Running BOPTEST CI tests, stdout redirected to stdout-boptest.log, stderr to stderr-boptest.log"
+	cd ${TMPDIR}/project1-boptest/testing && export PYTHONPATH=${NEW_PYPA} && make -s test_all > ${PWD}/stdout-boptest.log 2> ${PWD}/stderr-boptest.log
+	@echo "Silently try to remove the BOPTEST images"
+	cd ${TMPDIR}/project1-boptest/testing && make -s remove_jm_image 2> /dev/null | true
 	rm -rf ${TMPDIR}
-
 
 remove-image:
 	docker rmi ${DOCKER_USERNAME}/${IMG_NAME}
