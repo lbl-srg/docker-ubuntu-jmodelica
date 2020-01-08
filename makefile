@@ -1,5 +1,11 @@
-IMG_NAME=ubuntu-1804_jmodelica_trunk
 DOCKER_USERNAME=michaelwetter
+MAC_ADDRESS=00:25:90:0a:87:12
+
+IMG_NAME=travis-ubuntu-1804-oct
+OCT_VERSION=oct-r12473
+
+
+NAME=${DOCKER_USERNAME}/${IMG_NAME}
 
 COMMAND_RUN=docker run \
 	  --name jmodelica \
@@ -21,23 +27,45 @@ COMMAND_START=docker run \
 	  ${DOCKER_USERNAME}/${IMG_NAME} \
 	  /bin/bash -c -i
 
-print_latest_versions_from_svn:
-	svn log -l 1 https://svn.jmodelica.org/trunk
-	svn log -l 1 https://svn.jmodelica.org/assimulo/trunk
+DOCKER_FLAGS=\
+	--mac-address=${MAC_ADDRESS} \
+	--detach=false \
+	--rm \
+	--user=developer \
+	-v /tmp/.X11-unix:/tmp/.X11-unix \
+	-e DISPLAY=${DISPLAY} \
+	-v ${MODELICA_LIB}:/mnt/modelica_lib \
+	-v `pwd`/shared:/mnt/shared \
+	${NAME}
+
+COMMAND_RUN=docker run ${DOCKER_FLAGS} /bin/bash -c
+
+COMMAND_START=docker run -t --interactive ${DOCKER_FLAGS} /bin/bash -c -i
 
 build:
+	@echo Extracting ${OCT_VERSION}.tar.gz
+	@rm -rf opt
+	tar xzf ${HOME}/inst/modelon/${OCT_VERSION}.tar.gz
+	mv opt/${OCT_VERSION} opt/oct
+	cp ~/.modelon/0025900A8712.lic .
+	@echo Building docker image ${NAME}
 	docker build --no-cache --rm -t ${DOCKER_USERNAME}/${IMG_NAME} .
+	rm 0025900A8712.lic
+	rm -rf opt
 
-verify: verify-buildings-master verify-buildings-spawn verify-boptest
+verify: verify-buildings-master verify-buildings-spawn
 
-
-push:
-	docker push ${DOCKER_USERNAME}/${IMG_NAME}
+#push:
+#	docker push ${DOCKER_USERNAME}/${IMG_NAME}
 
 
 verify-buildings-master:
 	$(eval TMPDIR := $(shell mktemp -d -t tmp-ubuntu-jmodelica-verification-buildings-master-XXXX))
 	@echo "Running Modelica Buildings Library verification in $(TMPDIR)"
+	@echo "Setting path to include current directory that contains jm_ipython.sh"
+	$(eval export PATH=$(shell pwd):${PATH})
+	@echo "Exporting mac address for docker"
+	$(eval export MAC_ADDRESS=${MAC_ADDRESS})
 	cd ${TMPDIR} && git clone --depth 1 --recurse-submodules --quiet https://github.com/lbl-srg/BuildingsPy.git
 	cd ${TMPDIR} && git clone --depth 1 --quiet https://github.com/lbl-srg/modelica-buildings.git
 	$(eval PYTHONPATH := ${TMPDIR}/BuildingsPy:${TMPDIR}/modelica-buildings/Buildings/Resources/Python-Sources)
@@ -47,24 +75,14 @@ verify-buildings-master:
 verify-buildings-spawn:
 	$(eval TMPDIR := $(shell mktemp -d -t tmp-ubuntu-jmodelica-verification-buildings-spawn-XXXX))
 	@echo "Running Spawn verification in $(TMPDIR)"
+	@echo "Setting path to include current directory that contains jm_ipython.sh"
+	$(eval export PATH=$(shell pwd):${PATH})
+	@echo "Exporting mac address for docker"
+	$(eval export MAC_ADDRESS=${MAC_ADDRESS})
 	cd ${TMPDIR} && git clone --depth 1 --recurse-submodules --quiet https://github.com/lbl-srg/BuildingsPy.git
 	cd ${TMPDIR} && git clone --depth 1 --quiet -b issue1129_energyPlus_zone https://github.com/lbl-srg/modelica-buildings.git
 	$(eval PYTHONPATH := ${TMPDIR}/BuildingsPy:${TMPDIR}/modelica-buildings/Buildings/Resources/Python-Sources)
 	cd ${TMPDIR}/modelica-buildings/Buildings && ../bin/runUnitTests.py --skip-verification -t jmodelica -n 44 -s Buildings.Experimental.EnergyPlus
-	rm -rf ${TMPDIR}
-
-verify-boptest:
-	$(eval PWD := $(shell pwd))
-	$(eval TMPDIR := $(shell mktemp -d -t tmp-ubuntu-jmodelica-verification-boptest-XXXX))
-	@echo "Running BOPTEST verification in $(TMPDIR)"
-	cd ${TMPDIR} && git clone --depth 1 --quiet https://github.com/ibpsa/project1-boptest.git
-	$(eval NEW_PYPA := ${TMPDIR}/project1-boptest)
-	@echo "Silently try to remove the old image"
-	cd ${TMPDIR}/project1-boptest/testing && make -s remove_jm_image 2> /dev/null | true
-	@echo "Running BOPTEST CI tests, stdout and stderr redirected to verify-boptest.log"
-	cd ${TMPDIR}/project1-boptest/testing && export PYTHONPATH=${NEW_PYPA} && make -s test_all > ${PWD}/verify-boptest.log 2>&1
-	@echo "Silently try to remove the BOPTEST images"
-	cd ${TMPDIR}/project1-boptest/testing && make -s remove_jm_image 2> /dev/null | true
 	rm -rf ${TMPDIR}
 
 remove-image:
@@ -72,14 +90,14 @@ remove-image:
 
 start_bash:
 	$(COMMAND_START) \
-	   "export MODELICAPATH=/usr/local/JModelica/ThirdParty/MSL:. && \
+	   "export MODELICAPATH=/opt/oct/ThirdParty/MSL:. && \
             cd /mnt/shared && bash"
 
 start_ipython:
 	$(COMMAND_START) \
-	   "export MODELICAPATH=/usr/local/JModelica/ThirdParty/MSL:. && \
+	   "export MODELICAPATH=/oct/ThirdParty/MSL:. && \
             cd /mnt/shared && \
-	    /usr/local/JModelica/bin/jm_ipython.sh"
+	    /opt/oct/bin/jm_ipython.sh"
 
 clean_output:
 	rm `pwd`/shared/{*.txt,*.fmu}

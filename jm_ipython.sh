@@ -9,8 +9,11 @@
 # required directories.
 #################################################
 set -e
-IMG_NAME=ubuntu-1804_jmodelica_trunk
+
+IMG_NAME=travis-ubuntu-1804-oct
 DOCKER_USERNAME=michaelwetter
+
+NAME=${DOCKER_USERNAME}/${IMG_NAME}
 
 # Function declarations
 function create_mount_command()
@@ -41,6 +44,12 @@ function update_path_variable()
   new_pat=${new_pat%?}
   echo "${new_pat}"
 }
+
+# Make sure MAC_ADDRESS is set
+if [ -z ${MAC_ADDRESS+x} ]; then
+    echo "Error: Environment variable MAC_ADDRESS is not set."
+    exit 1
+fi
 
 # Export the MODELICAPATH
 if [ -z ${MODELICAPATH+x} ]; then
@@ -86,20 +95,24 @@ done
 
 # --user=${UID} \
 
-docker run \
-  --user=${UID} \
-  -i \
-  $DOCKER_INTERACTIVE \
-  --detach=false \
-  ${MOD_MOUNT} \
-  ${PYT_MOUNT} \
-  -v ${sha_dir}:/mnt/shared \
-  -e DISPLAY=${DISPLAY} \
-  -v /tmp/.X11-unix:/tmp/.X11-unix \
-  --rm \
-  ${DOCKER_USERNAME}/${IMG_NAME} /bin/bash -c \
+DOCKER_FLAGS="\
+	--mac-address=${MAC_ADDRESS} \
+	--detach=false \
+	--rm \
+	--user=developer \
+    ${MOD_MOUNT} \
+    ${PYT_MOUNT} \
+	-v /tmp/.X11-unix:/tmp/.X11-unix \
+	-e DISPLAY=${DISPLAY} \
+	-v ${MODELICA_LIB}:/mnt/modelica_lib \
+    -v ${sha_dir}:/mnt/shared \
+	${NAME}"
+
+docker run ${DOCKER_FLAGS} /bin/bash -c \
   "export MODELICAPATH=${DOCKER_MODELICAPATH}:/usr/local/JModelica/ThirdParty/MSL && \
    export PYTHONPATH=${DOCKER_PYTHONPATH} && \
   cd /mnt/shared/${bas_nam} && \
-  /usr/local/JModelica/bin/jm_ipython.sh ${arg_lis}"
+  alias ipython=ipython3 && \
+  /opt/oct/bin/jm_ipython.sh ${arg_lis}"
+
 exit $?
