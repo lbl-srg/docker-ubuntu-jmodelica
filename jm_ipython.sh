@@ -109,7 +109,7 @@ DOCKER_FLAGS="\
 	${NAME}"
 
 docker run ${DOCKER_FLAGS} /bin/bash -c \
-  "export MODELICAPATH=${DOCKER_MODELICAPATH}:/usr/local/JModelica/ThirdParty/MSL && \
+  "export MODELICAPATH=${DOCKER_MODELICAPATH}:/opt/oct/ThirdParty/MSL && \
    export PYTHONPATH=${DOCKER_PYTHONPATH} && \
   cd /mnt/shared/${bas_nam} && \
   alias ipython=ipython3 && \
