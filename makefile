@@ -1,8 +1,8 @@
 DOCKER_USERNAME=michaelwetter
 MAC_ADDRESS=00:25:90:0a:87:12
 
-IMG_NAME=travis-ubuntu-1804-oct
-OCT_VERSION=oct-r12473
+IMG_NAME=travis-ubuntu-1804-optimica
+OPTIMICA_VERSION=oct-r12473
 
 
 NAME=${DOCKER_USERNAME}/${IMG_NAME}
@@ -34,7 +34,6 @@ DOCKER_FLAGS=\
 	--user=developer \
 	-v /tmp/.X11-unix:/tmp/.X11-unix \
 	-e DISPLAY=${DISPLAY} \
-	-v ${MODELICA_LIB}:/mnt/modelica_lib \
 	-v `pwd`/shared:/mnt/shared \
 	${NAME}
 
@@ -43,10 +42,10 @@ COMMAND_RUN=docker run ${DOCKER_FLAGS} /bin/bash -c
 COMMAND_START=docker run -t --interactive ${DOCKER_FLAGS} /bin/bash -c -i
 
 build:
-	@echo Extracting ${OCT_VERSION}.tar.gz
+	@echo Extracting ${OPTIMICA_VERSION}.tar.gz
 	@rm -rf opt
-	tar xzf ${HOME}/inst/modelon/${OCT_VERSION}.tar.gz
-	mv opt/${OCT_VERSION} opt/oct
+	tar xzf ${HOME}/inst/modelon/${OPTIMICA_VERSION}.tar.gz
+	mv opt/${OPTIMICA_VERSION} opt/oct
 	cp ~/.modelon/0025900A8712.lic .
 	@echo Building docker image ${NAME}
 	docker build --no-cache --rm -t ${DOCKER_USERNAME}/${IMG_NAME} .
@@ -60,7 +59,7 @@ verify: verify-buildings-master verify-buildings-spawn
 
 
 verify-buildings-master:
-	$(eval TMPDIR := $(shell mktemp -d -t tmp-ubuntu-jmodelica-verification-buildings-master-XXXX))
+	$(eval TMPDIR := $(shell mktemp -d -t tmp-ubuntu-optimica-verification-buildings-master-XXXX))
 	@echo "Running Modelica Buildings Library verification in $(TMPDIR)"
 	@echo "Setting path to include current directory that contains jm_ipython.sh"
 	$(eval export PATH=$(shell pwd):${PATH})
@@ -69,11 +68,11 @@ verify-buildings-master:
 	cd ${TMPDIR} && git clone --depth 1 --recurse-submodules --quiet https://github.com/lbl-srg/BuildingsPy.git
 	cd ${TMPDIR} && git clone --depth 1 --quiet https://github.com/lbl-srg/modelica-buildings.git
 	$(eval PYTHONPATH := ${TMPDIR}/BuildingsPy:${TMPDIR}/modelica-buildings/Buildings/Resources/Python-Sources)
-	cd ${TMPDIR}/modelica-buildings/Buildings && ../bin/runUnitTests.py --skip-verification -t jmodelica -n 44
+	cd ${TMPDIR}/modelica-buildings/Buildings && ../bin/runUnitTests.py --skip-verification -t optimica -n 44
 	rm -rf ${TMPDIR}
 
 verify-buildings-spawn:
-	$(eval TMPDIR := $(shell mktemp -d -t tmp-ubuntu-jmodelica-verification-buildings-spawn-XXXX))
+	$(eval TMPDIR := $(shell mktemp -d -t tmp-ubuntu-optimica-verification-buildings-spawn-XXXX))
 	@echo "Running Spawn verification in $(TMPDIR)"
 	@echo "Setting path to include current directory that contains jm_ipython.sh"
 	$(eval export PATH=$(shell pwd):${PATH})
@@ -82,7 +81,7 @@ verify-buildings-spawn:
 	cd ${TMPDIR} && git clone --depth 1 --recurse-submodules --quiet https://github.com/lbl-srg/BuildingsPy.git
 	cd ${TMPDIR} && git clone --depth 1 --quiet -b issue1129_energyPlus_zone https://github.com/lbl-srg/modelica-buildings.git
 	$(eval PYTHONPATH := ${TMPDIR}/BuildingsPy:${TMPDIR}/modelica-buildings/Buildings/Resources/Python-Sources)
-	cd ${TMPDIR}/modelica-buildings/Buildings && ../bin/runUnitTests.py --skip-verification -t jmodelica -n 44 -s Buildings.Experimental.EnergyPlus
+	cd ${TMPDIR}/modelica-buildings/Buildings && ../bin/runUnitTests.py --skip-verification -t optimica -n 44 -s Buildings.ThermalZones.EnergyPlus
 	rm -rf ${TMPDIR}
 
 remove-image:
