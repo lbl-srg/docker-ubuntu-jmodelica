@@ -68,6 +68,7 @@ if opts['solver'].lower() == 'cvode':
     atol = rtol
 
   opts['CVode_options']['external_event_detection'] = False
+  opts['CVode_options']['maxh'] = (mod.get_default_experiment_stop_time()-mod.get_default_experiment_start_time())/float(opts['ncp'])
   opts['CVode_options']['iter'] = 'Newton'
   opts['CVode_options']['discr'] = 'BDF'
   opts['CVode_options']['rtol'] = rtol
