@@ -10,9 +10,9 @@ The docker image can be downloaded from
 To simulate a model, put the `jm_ipython.sh` file on your system's PATH variable
 and run from a directory that contains `jmodelica.py` the command
 ```
-jm_ipython.sh jmodelica.py Buildings.Controls.OBC.CDL.Continuous.Validation.LimPID
+jm_ipython.sh jmodelica.py Buildings.Utilities.Psychrometrics.Examples.DewPointTemperature
 ```
-This will search on the `MODELICAPATH` for the model `Buildings.Controls.OBC.CDL.Continuous.Validation.LimPID`
+This will search on the `MODELICAPATH` for the model `Buildings.Utilities.Psychrometrics.Examples.DewPointTemperature`
 and simulate it. The first time this command is executed, it will download the docker image.
 
 For interactive simulation, add the `-i` flag.
