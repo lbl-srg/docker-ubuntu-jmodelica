@@ -1,5 +1,5 @@
 IMG_NAME=ubuntu-1804_jmodelica_trunk
-DOCKER_USERNAME=michaelwetter
+DOCKER_REPONAME=lbnlblum
 
 COMMAND_RUN=docker run \
 	  --name jmodelica \
@@ -8,7 +8,7 @@ COMMAND_RUN=docker run \
 	  -v /tmp/.X11-unix:/tmp/.X11-unix \
 	  --rm \
 	  -v `pwd`/shared:/mnt/shared \
-	  ${DOCKER_USERNAME}/${IMG_NAME} /bin/bash -c
+	  ${DOCKER_REPONAME}/${IMG_NAME} /bin/bash -c
 
 
 COMMAND_START=docker run \
@@ -18,7 +18,7 @@ COMMAND_START=docker run \
 	  --interactive \
 	  -t \
 	  -v `pwd`/shared:/mnt/shared \
-	  ${DOCKER_USERNAME}/${IMG_NAME} \
+	  ${DOCKER_REPONAME}/${IMG_NAME} \
 	  /bin/bash -c -i
 
 print_latest_versions_from_svn:
@@ -26,13 +26,13 @@ print_latest_versions_from_svn:
 	svn log -l 1 https://svn.jmodelica.org/assimulo/trunk
 
 build:
-	docker build --no-cache --rm -t ${DOCKER_USERNAME}/${IMG_NAME} .
+	docker build --no-cache --rm -t ${DOCKER_REPONAME}/${IMG_NAME} .
 
 verify: verify-buildings-master verify-buildings-spawn verify-boptest
 
 
 push:
-	docker push ${DOCKER_USERNAME}/${IMG_NAME}
+	docker push ${DOCKER_REPONAME}/${IMG_NAME}
 
 
 verify-buildings-master:
@@ -68,7 +68,7 @@ verify-boptest:
 	rm -rf ${TMPDIR}
 
 remove-image:
-	docker rmi ${DOCKER_USERNAME}/${IMG_NAME}
+	docker rmi ${DOCKER_REPONAME}/${IMG_NAME}
 
 start_bash:
 	$(COMMAND_START) \

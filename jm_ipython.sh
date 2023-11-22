@@ -10,7 +10,7 @@
 #################################################
 set -e
 IMG_NAME=ubuntu-1804_jmodelica_trunk
-DOCKER_USERNAME=michaelwetter
+DOCKER_REPONAME=lbnlblum
 
 # Function declarations
 function create_mount_command()
@@ -97,7 +97,7 @@ docker run \
   -e DISPLAY=${DISPLAY} \
   -v /tmp/.X11-unix:/tmp/.X11-unix \
   --rm \
-  ${DOCKER_USERNAME}/${IMG_NAME} /bin/bash -c \
+  ${DOCKER_REPONAME}/${IMG_NAME} /bin/bash -c \
   "export MODELICAPATH=${DOCKER_MODELICAPATH}:/usr/local/JModelica/ThirdParty/MSL && \
    export PYTHONPATH=${DOCKER_PYTHONPATH} && \
   cd /mnt/shared/${bas_nam} && \
